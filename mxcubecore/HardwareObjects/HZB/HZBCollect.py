@@ -1,5 +1,5 @@
 """
-BL14Collect - Data collection orchestration for BL14 beamline
+HZBCollect - Data collection orchestration for BL14 beamline
 
 Coordinates detector, diffractometer, beam, and energy for data collection.
 """
@@ -8,7 +8,7 @@ import logging
 from mxcubecore.HardwareObjects.abstract.AbstractCollect import AbstractCollect
 
 
-class BL14Collect(AbstractCollect):
+class HZBCollect(AbstractCollect):
     """
     BL14 Data Collection implementation.
 
@@ -36,13 +36,13 @@ class BL14Collect(AbstractCollect):
                 hw_obj = HWR.get_hardware_object(hw_name)
                 if hw_obj:
                     setattr(self, f"_{hw_name}", hw_obj)
-                    logging.info(f"BL14Collect '{self.name}': Connected to '{hw_name}'")
+                    logging.info(f"HZBCollect '{self.name}': Connected to '{hw_name}'")
                 else:
-                    logging.warning(f"BL14Collect '{self.name}': Hardware '{hw_name}' not found")
+                    logging.warning(f"HZBCollect '{self.name}': Hardware '{hw_name}' not found")
             except Exception as e:
-                logging.error(f"BL14Collect '{self.name}': Error loading '{hw_name}': {e}")
+                logging.error(f"HZBCollect '{self.name}': Error loading '{hw_name}': {e}")
 
-        logging.info(f"BL14Collect '{self.name}': Initialized")
+        logging.info(f"HZBCollect '{self.name}': Initialized")
 
     def collect(self, params):
         """
@@ -57,7 +57,7 @@ class BL14Collect(AbstractCollect):
                 - transmission: Beam transmission (0-100%)
                 - energy: Energy in keV (optional)
         """
-        logging.info(f"BL14Collect '{self.name}': Starting data collection")
+        logging.info(f"HZBCollect '{self.name}': Starting data collection")
         logging.info(f"  Parameters: {params}")
 
         try:
@@ -87,11 +87,11 @@ class BL14Collect(AbstractCollect):
 
             # TODO: Implement actual collection loop
             # For now, just emit finished signal
-            logging.info(f"BL14Collect '{self.name}': Collection completed")
+            logging.info(f"HZBCollect '{self.name}': Collection completed")
             self.emit("collectionFinished", (params,))
 
         except Exception as e:
-            logging.error(f"BL14Collect '{self.name}': Collection failed: {e}")
+            logging.error(f"HZBCollect '{self.name}': Collection failed: {e}")
             self.emit("collectionFailed", (str(e),))
             raise
 
@@ -102,7 +102,7 @@ class BL14Collect(AbstractCollect):
         Args:
             params: Collection parameters dictionary
         """
-        logging.info(f"BL14Collect '{self.name}': Preparing collection")
+        logging.info(f"HZBCollect '{self.name}': Preparing collection")
 
         # Validate parameters
         required_params = ["exposure_time", "n_images", "oscillation_range"]
@@ -116,11 +116,11 @@ class BL14Collect(AbstractCollect):
         if not self._diffractometer:
             raise RuntimeError("Diffractometer not available")
 
-        logging.info(f"BL14Collect '{self.name}': Preparation complete")
+        logging.info(f"HZBCollect '{self.name}': Preparation complete")
 
     def abort(self):
         """Abort ongoing data collection."""
-        logging.info(f"BL14Collect '{self.name}': Aborting collection")
+        logging.info(f"HZBCollect '{self.name}': Aborting collection")
 
         if self._detector:
             self._detector.stop_acquisition()

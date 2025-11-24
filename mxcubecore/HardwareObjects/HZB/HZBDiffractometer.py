@@ -1,5 +1,5 @@
 """
-BL14Diffractometer - Diffractometer implementation for BL14 beamline
+HZBDiffractometer - Diffractometer implementation for BL14 beamline
 
 MD3 kappa diffractometer control.
 """
@@ -8,7 +8,7 @@ import logging
 from mxcubecore.HardwareObjects.abstract.AbstractDiffractometer import AbstractDiffractometer
 
 
-class BL14Diffractometer(AbstractDiffractometer):
+class HZBDiffractometer(AbstractDiffractometer):
     """
     BL14 Diffractometer implementation for MD3 kappa geometry.
     """
@@ -34,16 +34,16 @@ class BL14Diffractometer(AbstractDiffractometer):
                 motor = HWR.get_hardware_object(motor_ref)
                 if motor:
                     self._motors[motor_name] = motor
-                    logging.info(f"BL14Diffractometer '{self.name}': Motor '{motor_name}' connected")
+                    logging.info(f"HZBDiffractometer '{self.name}': Motor '{motor_name}' connected")
                 else:
-                    logging.warning(f"BL14Diffractometer '{self.name}': Motor '{motor_ref}' not found")
+                    logging.warning(f"HZBDiffractometer '{self.name}': Motor '{motor_ref}' not found")
             except Exception as e:
-                logging.error(f"BL14Diffractometer '{self.name}': Error loading motor '{motor_name}': {e}")
+                logging.error(f"HZBDiffractometer '{self.name}': Error loading motor '{motor_name}': {e}")
 
         centering_config = self.get_property("centering", {})
         self._centering_method = centering_config.get("default_method", "loop")
 
-        logging.info(f"BL14Diffractometer '{self.name}': Initialized with {len(self._motors)} motors")
+        logging.info(f"HZBDiffractometer '{self.name}': Initialized with {len(self._motors)} motors")
 
     def get_motor(self, motor_name):
         """Get motor object by name."""
@@ -59,10 +59,10 @@ class BL14Diffractometer(AbstractDiffractometer):
         for motor_name, position in motors_dict.items():
             motor = self._motors.get(motor_name)
             if motor:
-                logging.info(f"BL14Diffractometer '{self.name}': Moving {motor_name} to {position}")
+                logging.info(f"HZBDiffractometer '{self.name}': Moving {motor_name} to {position}")
                 motor.set_value(position)
             else:
-                logging.warning(f"BL14Diffractometer '{self.name}': Motor '{motor_name}' not available")
+                logging.warning(f"HZBDiffractometer '{self.name}': Motor '{motor_name}' not available")
 
     def get_positions(self):
         """Get current positions of all motors."""
@@ -71,7 +71,7 @@ class BL14Diffractometer(AbstractDiffractometer):
             try:
                 positions[motor_name] = motor.get_value()
             except Exception as e:
-                logging.error(f"BL14Diffractometer '{self.name}': Error reading {motor_name}: {e}")
+                logging.error(f"HZBDiffractometer '{self.name}': Error reading {motor_name}: {e}")
                 positions[motor_name] = None
         return positions
 
@@ -83,7 +83,7 @@ class BL14Diffractometer(AbstractDiffractometer):
             method: Centering method ("loop", "xray", "optical")
         """
         method = method or self._centering_method
-        logging.info(f"BL14Diffractometer '{self.name}': Centering sample using '{method}' method")
+        logging.info(f"HZBDiffractometer '{self.name}': Centering sample using '{method}' method")
 
         # TODO: Implement actual centering logic
         # For now, just emit signal
@@ -91,9 +91,9 @@ class BL14Diffractometer(AbstractDiffractometer):
 
     def abort(self):
         """Abort all motor movements."""
-        logging.info(f"BL14Diffractometer '{self.name}': Aborting all motors")
+        logging.info(f"HZBDiffractometer '{self.name}': Aborting all motors")
         for motor_name, motor in self._motors.items():
             try:
                 motor.abort()
             except Exception as e:
-                logging.error(f"BL14Diffractometer '{self.name}': Error aborting {motor_name}: {e}")
+                logging.error(f"HZBDiffractometer '{self.name}': Error aborting {motor_name}: {e}")

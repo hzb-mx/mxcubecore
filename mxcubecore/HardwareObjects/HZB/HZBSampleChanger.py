@@ -1,5 +1,5 @@
 """
-BL14SampleChanger - Sample changer implementation for BL14 beamline
+HZBSampleChanger - Sample changer implementation for BL14 beamline
 
 CAT (CATS-like) sample changer control via TANGO.
 """
@@ -12,10 +12,10 @@ try:
     TANGO_AVAILABLE = True
 except ImportError:
     TANGO_AVAILABLE = False
-    logging.warning("PyTango not available - BL14SampleChanger will run in simulation mode")
+    logging.warning("PyTango not available - HZBSampleChanger will run in simulation mode")
 
 
-class BL14SampleChanger(AbstractSampleChanger):
+class HZBSampleChanger(AbstractSampleChanger):
     """
     BL14 Sample Changer implementation for CAT system.
     """
@@ -44,12 +44,12 @@ class BL14SampleChanger(AbstractSampleChanger):
             try:
                 self._tango_device = DeviceProxy(tango_device_name)
                 self._tango_device.ping()
-                logging.info(f"BL14SampleChanger '{self.name}': Connected to TANGO device")
+                logging.info(f"HZBSampleChanger '{self.name}': Connected to TANGO device")
             except DevFailed as e:
-                logging.error(f"BL14SampleChanger '{self.name}': Failed to connect: {e}")
+                logging.error(f"HZBSampleChanger '{self.name}': Failed to connect: {e}")
                 self._tango_device = None
         else:
-            logging.warning(f"BL14SampleChanger '{self.name}': Running in simulation mode")
+            logging.warning(f"HZBSampleChanger '{self.name}': Running in simulation mode")
 
     def get_sample_list(self):
         """Get list of available samples."""
@@ -72,27 +72,27 @@ class BL14SampleChanger(AbstractSampleChanger):
         Args:
             sample_location: Sample location string (e.g., "1:05" for basket 1, position 5)
         """
-        logging.info(f"BL14SampleChanger '{self.name}': Loading sample {sample_location}")
+        logging.info(f"HZBSampleChanger '{self.name}': Loading sample {sample_location}")
 
         if self._tango_device:
             try:
                 self._tango_device.LoadSample(sample_location)
                 self._loaded_sample = sample_location
                 self.emit("sampleLoaded", (sample_location,))
-                logging.info(f"BL14SampleChanger '{self.name}': Sample {sample_location} loaded")
+                logging.info(f"HZBSampleChanger '{self.name}': Sample {sample_location} loaded")
             except DevFailed as e:
-                logging.error(f"BL14SampleChanger '{self.name}': Error loading sample: {e}")
+                logging.error(f"HZBSampleChanger '{self.name}': Error loading sample: {e}")
                 raise RuntimeError(f"Failed to load sample: {e}")
         else:
             # Simulation mode
-            logging.info(f"BL14SampleChanger '{self.name}': [SIMULATION] Sample {sample_location} loaded")
+            logging.info(f"HZBSampleChanger '{self.name}': [SIMULATION] Sample {sample_location} loaded")
             self._loaded_sample = sample_location
             self.emit("sampleLoaded", (sample_location,))
 
     def unload_sample(self):
         """Unload current sample."""
         if self._loaded_sample:
-            logging.info(f"BL14SampleChanger '{self.name}': Unloading sample {self._loaded_sample}")
+            logging.info(f"HZBSampleChanger '{self.name}': Unloading sample {self._loaded_sample}")
 
             if self._tango_device:
                 try:
@@ -100,18 +100,18 @@ class BL14SampleChanger(AbstractSampleChanger):
                     sample = self._loaded_sample
                     self._loaded_sample = None
                     self.emit("sampleUnloaded", (sample,))
-                    logging.info(f"BL14SampleChanger '{self.name}': Sample unloaded")
+                    logging.info(f"HZBSampleChanger '{self.name}': Sample unloaded")
                 except DevFailed as e:
-                    logging.error(f"BL14SampleChanger '{self.name}': Error unloading sample: {e}")
+                    logging.error(f"HZBSampleChanger '{self.name}': Error unloading sample: {e}")
                     raise RuntimeError(f"Failed to unload sample: {e}")
             else:
                 # Simulation mode
-                logging.info(f"BL14SampleChanger '{self.name}': [SIMULATION] Sample unloaded")
+                logging.info(f"HZBSampleChanger '{self.name}': [SIMULATION] Sample unloaded")
                 sample = self._loaded_sample
                 self._loaded_sample = None
                 self.emit("sampleUnloaded", (sample,))
         else:
-            logging.warning(f"BL14SampleChanger '{self.name}': No sample to unload")
+            logging.warning(f"HZBSampleChanger '{self.name}': No sample to unload")
 
     def get_loaded_sample(self):
         """Get currently loaded sample location."""
@@ -122,8 +122,8 @@ class BL14SampleChanger(AbstractSampleChanger):
         if self._tango_device:
             try:
                 self._tango_device.Abort()
-                logging.info(f"BL14SampleChanger '{self.name}': Aborted")
+                logging.info(f"HZBSampleChanger '{self.name}': Aborted")
             except DevFailed as e:
-                logging.error(f"BL14SampleChanger '{self.name}': Error aborting: {e}")
+                logging.error(f"HZBSampleChanger '{self.name}': Error aborting: {e}")
         else:
-            logging.info(f"BL14SampleChanger '{self.name}': [SIMULATION] Aborted")
+            logging.info(f"HZBSampleChanger '{self.name}': [SIMULATION] Aborted")

@@ -1,5 +1,5 @@
 """
-BL14Detector - Detector implementation for BL14 beamline
+HZBDetector - Detector implementation for BL14 beamline
 
 Pilatus3 detector control via TANGO.
 """
@@ -12,10 +12,10 @@ try:
     TANGO_AVAILABLE = True
 except ImportError:
     TANGO_AVAILABLE = False
-    logging.warning("PyTango not available - BL14Detector will run in simulation mode")
+    logging.warning("PyTango not available - HZBDetector will run in simulation mode")
 
 
-class BL14Detector(AbstractDetector):
+class HZBDetector(AbstractDetector):
     """
     BL14 Detector implementation for Pilatus3 detector.
     """
@@ -57,12 +57,12 @@ class BL14Detector(AbstractDetector):
             try:
                 self._tango_device = DeviceProxy(tango_device_name)
                 self._tango_device.ping()
-                logging.info(f"BL14Detector '{self.name}': Connected to TANGO device")
+                logging.info(f"HZBDetector '{self.name}': Connected to TANGO device")
             except DevFailed as e:
-                logging.error(f"BL14Detector '{self.name}': Failed to connect: {e}")
+                logging.error(f"HZBDetector '{self.name}': Failed to connect: {e}")
                 self._tango_device = None
         else:
-            logging.warning(f"BL14Detector '{self.name}': Running in simulation mode")
+            logging.warning(f"HZBDetector '{self.name}': Running in simulation mode")
 
     def get_pixel_size(self):
         """Get detector pixel size in mm."""
@@ -84,23 +84,23 @@ class BL14Detector(AbstractDetector):
         if self._tango_device:
             try:
                 self._tango_device.ExposureTime = exposure
-                logging.info(f"BL14Detector '{self.name}': Prepared for acquisition (exp={exposure}s)")
+                logging.info(f"HZBDetector '{self.name}': Prepared for acquisition (exp={exposure}s)")
             except DevFailed as e:
-                logging.error(f"BL14Detector '{self.name}': Error preparing acquisition: {e}")
+                logging.error(f"HZBDetector '{self.name}': Error preparing acquisition: {e}")
         else:
-            logging.info(f"BL14Detector '{self.name}': [SIMULATION] Prepared (exp={exposure}s)")
+            logging.info(f"HZBDetector '{self.name}': [SIMULATION] Prepared (exp={exposure}s)")
 
     def start_acquisition(self):
         """Start data acquisition."""
         if self._tango_device:
             try:
                 self._tango_device.Start()
-                logging.info(f"BL14Detector '{self.name}': Acquisition started")
+                logging.info(f"HZBDetector '{self.name}': Acquisition started")
                 self.emit("acquisitionStarted", ())
             except DevFailed as e:
-                logging.error(f"BL14Detector '{self.name}': Error starting acquisition: {e}")
+                logging.error(f"HZBDetector '{self.name}': Error starting acquisition: {e}")
         else:
-            logging.info(f"BL14Detector '{self.name}': [SIMULATION] Acquisition started")
+            logging.info(f"HZBDetector '{self.name}': [SIMULATION] Acquisition started")
             self.emit("acquisitionStarted", ())
 
     def stop_acquisition(self):
@@ -108,11 +108,11 @@ class BL14Detector(AbstractDetector):
         if self._tango_device:
             try:
                 self._tango_device.Stop()
-                logging.info(f"BL14Detector '{self.name}': Acquisition stopped")
+                logging.info(f"HZBDetector '{self.name}': Acquisition stopped")
             except DevFailed as e:
-                logging.error(f"BL14Detector '{self.name}': Error stopping acquisition: {e}")
+                logging.error(f"HZBDetector '{self.name}': Error stopping acquisition: {e}")
         else:
-            logging.info(f"BL14Detector '{self.name}': [SIMULATION] Acquisition stopped")
+            logging.info(f"HZBDetector '{self.name}': [SIMULATION] Acquisition stopped")
 
     def get_distance(self):
         """Get detector distance in mm."""
@@ -128,9 +128,9 @@ class BL14Detector(AbstractDetector):
         if self._tango_device:
             try:
                 self._tango_device.Distance = distance
-                logging.info(f"BL14Detector '{self.name}': Distance set to {distance} mm")
+                logging.info(f"HZBDetector '{self.name}': Distance set to {distance} mm")
             except (DevFailed, AttributeError) as e:
-                logging.error(f"BL14Detector '{self.name}': Error setting distance: {e}")
+                logging.error(f"HZBDetector '{self.name}': Error setting distance: {e}")
         else:
-            logging.info(f"BL14Detector '{self.name}': [SIMULATION] Distance set to {distance} mm")
+            logging.info(f"HZBDetector '{self.name}': [SIMULATION] Distance set to {distance} mm")
             self._distance = distance

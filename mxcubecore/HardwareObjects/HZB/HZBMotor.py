@@ -1,5 +1,5 @@
 """
-BL14Motor - Motor implementation for BL14 beamline
+HZBMotor - Motor implementation for HZB beamline
 
 Supports both rotation and translation motors via TANGO control system.
 """
@@ -12,12 +12,12 @@ try:
     TANGO_AVAILABLE = True
 except ImportError:
     TANGO_AVAILABLE = False
-    logging.warning("PyTango not available - BL14Motor will run in simulation mode")
+    logging.warning("PyTango not available - HZBMotor will run in simulation mode")
 
 
-class BL14Motor(AbstractMotor):
+class HZBMotor(AbstractMotor):
     """
-    BL14 Motor implementation using TANGO control system.
+    HZB Motor implementation using TANGO control system.
 
     Supports both rotation (omega, phi, kappa) and translation (sample_x, sample_y) motors.
     """
@@ -55,13 +55,13 @@ class BL14Motor(AbstractMotor):
             try:
                 self._tango_device = DeviceProxy(tango_device_name)
                 self._tango_device.ping()
-                logging.info(f"BL14Motor '{self.name}': Connected to TANGO device {tango_device_name}")
+                logging.info(f"HZBMotor '{self.name}': Connected to TANGO device {tango_device_name}")
                 self._update_state()
             except DevFailed as e:
-                logging.error(f"BL14Motor '{self.name}': Failed to connect to TANGO device: {e}")
+                logging.error(f"HZBMotor '{self.name}': Failed to connect to TANGO device: {e}")
                 self._tango_device = None
         else:
-            logging.warning(f"BL14Motor '{self.name}': Running in simulation mode")
+            logging.warning(f"HZBMotor '{self.name}': Running in simulation mode")
 
     def _update_state(self):
         """Update motor state from TANGO device."""
@@ -74,7 +74,7 @@ class BL14Motor(AbstractMotor):
                 # Emit state change signal
                 self.emit("stateChanged", (str(state),))
             except DevFailed as e:
-                logging.error(f"BL14Motor '{self.name}': Error reading state: {e}")
+                logging.error(f"HZBMotor '{self.name}': Error reading state: {e}")
 
     def get_value(self):
         """Get current motor position."""
@@ -82,7 +82,7 @@ class BL14Motor(AbstractMotor):
             try:
                 return float(self._tango_device.Position)
             except DevFailed as e:
-                logging.error(f"BL14Motor '{self.name}': Error reading position: {e}")
+                logging.error(f"HZBMotor '{self.name}': Error reading position: {e}")
                 return self._simulation_position
         else:
             return self._simulation_position
@@ -105,20 +105,20 @@ class BL14Motor(AbstractMotor):
         # Validate limits
         if not (self._limits[0] <= value <= self._limits[1]):
             raise ValueError(
-                f"BL14Motor '{self.name}': Position {value} out of limits {self._limits}"
+                f"HZBMotor '{self.name}': Position {value} out of limits {self._limits}"
             )
 
         if self._tango_device:
             try:
-                logging.info(f"BL14Motor '{self.name}': Moving to {value} {self._unit}")
+                logging.info(f"HZBMotor '{self.name}': Moving to {value} {self._unit}")
                 self._tango_device.Position = value
                 self.emit("valueChanged", (value,))
             except DevFailed as e:
-                logging.error(f"BL14Motor '{self.name}': Error moving motor: {e}")
+                logging.error(f"HZBMotor '{self.name}': Error moving motor: {e}")
                 raise RuntimeError(f"Failed to move motor: {e}")
         else:
             # Simulation mode
-            logging.info(f"BL14Motor '{self.name}': [SIMULATION] Moving to {value} {self._unit}")
+            logging.info(f"HZBMotor '{self.name}': [SIMULATION] Moving to {value} {self._unit}")
             self._simulation_position = value
             self.emit("valueChanged", (value,))
 
@@ -127,11 +127,11 @@ class BL14Motor(AbstractMotor):
         if self._tango_device:
             try:
                 self._tango_device.Stop()
-                logging.info(f"BL14Motor '{self.name}': Aborted")
+                logging.info(f"HZBMotor '{self.name}': Aborted")
             except DevFailed as e:
-                logging.error(f"BL14Motor '{self.name}': Error aborting: {e}")
+                logging.error(f"HZBMotor '{self.name}': Error aborting: {e}")
         else:
-            logging.info(f"BL14Motor '{self.name}': [SIMULATION] Aborted")
+            logging.info(f"HZBMotor '{self.name}': [SIMULATION] Aborted")
 
     def stop(self):
         """Stop motor movement (alias for abort)."""
@@ -142,11 +142,11 @@ class BL14Motor(AbstractMotor):
         if self._tango_device:
             try:
                 self._tango_device.Home()
-                logging.info(f"BL14Motor '{self.name}': Homing")
+                logging.info(f"HZBMotor '{self.name}': Homing")
             except DevFailed as e:
-                logging.error(f"BL14Motor '{self.name}': Error homing: {e}")
+                logging.error(f"HZBMotor '{self.name}': Error homing: {e}")
         else:
-            logging.info(f"BL14Motor '{self.name}': [SIMULATION] Homing")
+            logging.info(f"HZBMotor '{self.name}': [SIMULATION] Homing")
             self._simulation_position = 0.0
 
     def get_state(self):

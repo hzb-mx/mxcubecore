@@ -1,5 +1,5 @@
 """
-BL14Beam - Beam properties and control for BL14 beamline
+HZBBeam - Beam properties and control for BL14 beamline
 
 Beam size, position, flux, and transmission control.
 """
@@ -12,10 +12,10 @@ try:
     TANGO_AVAILABLE = True
 except ImportError:
     TANGO_AVAILABLE = False
-    logging.warning("PyTango not available - BL14Beam will run in simulation mode")
+    logging.warning("PyTango not available - HZBBeam will run in simulation mode")
 
 
-class BL14Beam(HardwareObject):
+class HZBBeam(HardwareObject):
     """
     BL14 Beam implementation for beam properties and control.
     """
@@ -53,9 +53,9 @@ class BL14Beam(HardwareObject):
             try:
                 self._flux_device = DeviceProxy(flux_device_name)
                 self._flux_device.ping()
-                logging.info(f"BL14Beam '{self.name}': Connected to flux monitor")
+                logging.info(f"HZBBeam '{self.name}': Connected to flux monitor")
             except DevFailed as e:
-                logging.error(f"BL14Beam '{self.name}': Failed to connect to flux monitor: {e}")
+                logging.error(f"HZBBeam '{self.name}': Failed to connect to flux monitor: {e}")
                 self._flux_device = None
 
         # Connect to transmission control
@@ -66,9 +66,9 @@ class BL14Beam(HardwareObject):
             try:
                 self._transmission_device = DeviceProxy(transmission_device_name)
                 self._transmission_device.ping()
-                logging.info(f"BL14Beam '{self.name}': Connected to transmission control")
+                logging.info(f"HZBBeam '{self.name}': Connected to transmission control")
             except DevFailed as e:
-                logging.error(f"BL14Beam '{self.name}': Failed to connect to transmission: {e}")
+                logging.error(f"HZBBeam '{self.name}': Failed to connect to transmission: {e}")
                 self._transmission_device = None
 
     def get_beam_size(self):
@@ -85,7 +85,7 @@ class BL14Beam(HardwareObject):
             try:
                 return float(self._flux_device.Flux)
             except (DevFailed, AttributeError) as e:
-                logging.error(f"BL14Beam '{self.name}': Error reading flux: {e}")
+                logging.error(f"HZBBeam '{self.name}': Error reading flux: {e}")
                 return 1e12  # Simulated value
         return 1e12  # Simulated value
 
@@ -106,18 +106,18 @@ class BL14Beam(HardwareObject):
             transmission: Target transmission (0-100%)
         """
         if not (0 <= transmission <= 100):
-            raise ValueError(f"BL14Beam '{self.name}': Transmission must be 0-100%")
+            raise ValueError(f"HZBBeam '{self.name}': Transmission must be 0-100%")
 
         if self._transmission_device:
             try:
-                logging.info(f"BL14Beam '{self.name}': Setting transmission to {transmission}%")
+                logging.info(f"HZBBeam '{self.name}': Setting transmission to {transmission}%")
                 self._transmission_device.Transmission = transmission
                 self._transmission = transmission
                 self.emit("transmissionChanged", (transmission,))
             except (DevFailed, AttributeError) as e:
-                logging.error(f"BL14Beam '{self.name}': Error setting transmission: {e}")
+                logging.error(f"HZBBeam '{self.name}': Error setting transmission: {e}")
         else:
             # Simulation mode
-            logging.info(f"BL14Beam '{self.name}': [SIMULATION] Setting transmission to {transmission}%")
+            logging.info(f"HZBBeam '{self.name}': [SIMULATION] Setting transmission to {transmission}%")
             self._transmission = transmission
             self.emit("transmissionChanged", (transmission,))
