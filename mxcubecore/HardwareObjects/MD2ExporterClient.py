@@ -52,18 +52,29 @@ class MD2ExporterClient:
     def recv_raw(self, bufsize: int = 4096) -> str:
         if not self._sock:
             raise RuntimeError("Not connected")
-        return self._sock.recv(bufsize).decode("utf-8", errors="replace")
+        data = self._sock.recv(bufsize).decode("utf-8", errors="replace")
+        # Strip control characters (STX=0x02, ETX=0x03)
+        return data.strip("\x02\x03")
 
     def query(self, command: str) -> str:
         self.send_raw(command)
         return self.recv_raw()
 
     # Heuristic helpers (speculative, adjust when protocol specifics known)
+    def get_state(self) -> str:
+        """Query exporter state. Returns parsed state string."""
+        response = self.query("State")
+        # Response format: EVT:State\tReady\ttimestamp\torg.embl.State
+        parts = response.split("\t")
+        if len(parts) >= 2:
+            return parts[1]  # e.g., "Ready"
+        return response
+
     def get_motor_states(self) -> List[str]:
-        """Attempt to retrieve motor states if exporter supports a 'motor_states' command.
+        """Attempt to retrieve motor states if exporter supports a 'MotorStates' command.
         Returns raw tokens list like ['Omega=Ready','SampX=Moving'] when available.
         """
-        response = self.query("motor_states")
+        response = self.query("MotorStates")
         return [tok.strip() for tok in response.strip().split(";") if tok.strip()]
 
     def get_beam_position(self) -> Optional[Tuple[float, float]]:
@@ -83,5 +94,6 @@ if __name__ == "__main__":
     host = sys.argv[1] if len(sys.argv) > 1 else "172.31.212.130"
     with MD2ExporterClient(host) as client:
         print("Connected to", host)
+        print("State:", client.get_state())
         print("Motor states:", client.get_motor_states())
         print("Beam position:", client.get_beam_position())
