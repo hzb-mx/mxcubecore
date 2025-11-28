@@ -25,21 +25,21 @@ class HZBEnergy(AbstractEnergy):
     def init(self):
         """Initialize SPEC connection and command."""
         super().init()
-        
+
         # Get SPEC configuration from YAML
         spec_config = self.get_property("spec", {})
         self.spec_version = spec_config.get("version", "bl141:spec")
         self.command_name = spec_config.get("command", "prodc_set_mono")
-        
+
         # Lazy import to avoid hard dependency on SpecClient
         try:
             from SpecClient_gevent import SpecConnection, SpecCommand
-            
+
             self.spec_connection = SpecConnection.SpecConnection(self.spec_version)
             self.spec_command = SpecCommand.SpecCommand(
                 self.command_name, self.spec_connection
             )
-            
+
             logging.getLogger("HWR").info(
                 f"HZBEnergy: Connected to SPEC {self.spec_version}, "
                 f"command '{self.command_name}'"
@@ -53,11 +53,11 @@ class HZBEnergy(AbstractEnergy):
 
     def get_value(self):
         """Read current energy value.
-        
+
         Note: Production XML does not specify a SPEC channel for reading energy.
         This may rely on the motor object (/energymot) or a separate channel.
         For now, return cached value or None.
-        
+
         Returns:
             (float): Current energy [keV] or None if unavailable.
         """
@@ -73,7 +73,7 @@ class HZBEnergy(AbstractEnergy):
 
     def _set_value(self, value):
         """Set energy by calling SPEC command.
-        
+
         Args:
             value (float): Target energy [keV]
         """
@@ -82,11 +82,11 @@ class HZBEnergy(AbstractEnergy):
                 "HZBEnergy: SPEC command not available. "
                 "Check SPEC connection and SpecClient installation."
             )
-        
+
         logging.getLogger("HWR").info(
             f"HZBEnergy: Setting energy to {value} keV via SPEC command '{self.command_name}'"
         )
-        
+
         try:
             # Execute SPEC command with energy value as argument
             self.spec_command(value)
@@ -111,7 +111,7 @@ class HZBEnergy(AbstractEnergy):
 
     def get_limits(self):
         """Get energy limits.
-        
+
         Returns:
             (tuple): (min_energy, max_energy) in keV
         """
